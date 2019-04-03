@@ -21,6 +21,35 @@ namespace FluentValidation {
 	using System.Collections.Generic;
 	using Internal;
 	using Validators;
+	
+	/// <summary>
+	/// Rule builder
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <typeparam name="TProperty"></typeparam>
+	public interface ISyntaxBase<T, out TProperty, TChainType, out TReturn> {
+//		/// <summary>
+//		/// Associates a validator with this the property for this rule builder.
+//		/// </summary>
+//		/// <param name="validator">The validator to set</param>
+//		/// <returns></returns>
+//		TReturn SetValidator(IPropertyValidator validator);
+//
+//		/// <summary>
+//		/// Associates an instance of IValidator with the current property rule.
+//		/// </summary>
+//		/// <param name="validator">The validator to use</param>
+//		/// <param name="ruleSets"></param>
+//		TReturn SetValidator(IValidator<TProperty> validator, params string[] ruleSets);
+//
+//		/// <summary>
+//		/// Associates a validator provider with the current property rule.
+//		/// </summary>
+//		/// <param name="validatorProvider">The validator provider to use</param>
+//		/// <param name="ruleSets"></param>
+//		TReturn SetValidator<TValidator>(Func<T, TValidator> validatorProvider, params string[] ruleSets)
+//			where TValidator : IValidator<TProperty>;
+	}
 
 	/// <summary>
 	/// Rule builder that starts the chain
@@ -35,7 +64,7 @@ namespace FluentValidation {
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	/// <typeparam name="TProperty"></typeparam>
-	public interface IRuleBuilder<T, out TProperty> {
+	public interface IRuleBuilder<T, out TProperty> : ISyntaxBase<T,TProperty, AbstractValidator<T>, IRuleBuilderOptions<T,TProperty>> {
 		/// <summary>
 		/// Associates a validator with this the property for this rule builder.
 		/// </summary>
