@@ -28,7 +28,7 @@ namespace FluentValidation.Validators {
 	using Resources;
 	using Results;
 
-	public abstract class PropertyValidator : IPropertyValidator {
+	public abstract class PropertyValidator : IPropertyValidator, IAsyncPropertyValidator {
 		public PropertyValidatorOptions Options { get; } = new PropertyValidatorOptions();
 
 		protected PropertyValidator(IStringSource errorMessageSource) {

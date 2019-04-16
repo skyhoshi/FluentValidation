@@ -38,6 +38,13 @@ namespace FluentValidation.Validators {
 		IEnumerable<ValidationFailure> Validate(PropertyValidatorContext context);
 		
 		/// <summary>
+		/// Additional options for configuring the property validator.
+		/// </summary>
+		PropertyValidatorOptions Options { get; }
+	}
+
+	public interface IAsyncPropertyValidator {
+		/// <summary>
 		/// Performs validation asynchronously.
 		/// </summary>
 		/// <param name="context"></param>

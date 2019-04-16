@@ -284,9 +284,9 @@ namespace FluentValidation.Internal {
 			// Invoke each validator and collect its results.
 			foreach (var validator in _validators) {
 				IEnumerable<ValidationFailure> results;
-				if (validator.ShouldValidateAsync(context))
+				if (validator is IAsyncPropertyValidator apv && apv.ShouldValidateAsync(context))
 					//TODO: For FV 9 by default disallow invocation of async validators when running synchronously.
-					results = InvokePropertyValidatorAsync(context, validator, propertyName, default).GetAwaiter().GetResult();
+					results = InvokePropertyValidatorAsync(context, apv, propertyName, default).GetAwaiter().GetResult();
 				else
 					results = InvokePropertyValidator(context, validator, propertyName);
 
@@ -364,7 +364,7 @@ namespace FluentValidation.Internal {
 			var fastExit = false;
 
 			// Firstly, invoke all synchronous validators and collect their results.
-			foreach (var validator in _validators.Where(v => !v.ShouldValidateAsync(context))) {
+			foreach (var validator in _validators.Where(v => !(v is IAsyncPropertyValidator apv) || !apv.ShouldValidateAsync(context))) {
 				cancellation.ThrowIfCancellationRequested();
 				failures.AddRange(InvokePropertyValidator(context, validator, propertyName));
 
@@ -384,7 +384,7 @@ namespace FluentValidation.Internal {
 				return failures;
 			}
 
-			var asyncValidators = _validators.Where(v => v.ShouldValidateAsync(context)).ToList();
+			var asyncValidators = _validators.OfType<IAsyncPropertyValidator>().Where(v => v.ShouldValidateAsync(context)).ToList();
 
 			// if there's no async validators then we exit
 			if (asyncValidators.Count == 0) {
@@ -439,7 +439,7 @@ namespace FluentValidation.Internal {
 		/// <param name="propertyName"></param>
 		/// <param name="cancellation"></param>
 		/// <returns></returns>
-		protected virtual Task<IEnumerable<ValidationFailure>> InvokePropertyValidatorAsync(ValidationContext context, IPropertyValidator validator, string propertyName, CancellationToken cancellation) {
+		protected virtual Task<IEnumerable<ValidationFailure>> InvokePropertyValidatorAsync(ValidationContext context, IAsyncPropertyValidator validator, string propertyName, CancellationToken cancellation) {
 			return validator.ValidateAsync(new PropertyValidatorContext(context, this, propertyName), cancellation);
 		}
 

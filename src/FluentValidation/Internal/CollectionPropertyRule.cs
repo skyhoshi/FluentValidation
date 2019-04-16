@@ -75,7 +75,7 @@ namespace FluentValidation.Internal {
 		/// <param name="propertyName"></param>
 		/// <param name="cancellation"></param>
 		/// <returns></returns>
-		protected override async Task<IEnumerable<ValidationFailure>> InvokePropertyValidatorAsync(ValidationContext context, IPropertyValidator validator, string propertyName, CancellationToken cancellation) {
+		protected override async Task<IEnumerable<ValidationFailure>> InvokePropertyValidatorAsync(ValidationContext context, IAsyncPropertyValidator validator, string propertyName, CancellationToken cancellation) {
 			if (string.IsNullOrEmpty(propertyName)) {
 				propertyName = InferPropertyName(Expression);
 			}

@@ -24,7 +24,13 @@
 		}
 
 		public override async Task<IEnumerable<ValidationFailure>> ValidateAsync(PropertyValidatorContext context, CancellationToken cancellation) {
-			var results = (await _innerValidator.ValidateAsync(context, cancellation)).ToList();
+			List<ValidationFailure> results;
+			if (_innerValidator is IAsyncPropertyValidator apv) {
+				 results = (await apv.ValidateAsync(context, cancellation)).ToList();
+			}
+			else {
+				results = _innerValidator.Validate(context).ToList();
+			}
 			if (!results.Any()) return results;
 			var errorMessage = results.First().ErrorMessage;
 			_onFailure((T) context.InstanceToValidate, context, errorMessage);

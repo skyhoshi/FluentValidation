@@ -17,7 +17,7 @@ namespace FluentValidation.Validators {
 		Type ValidatorType { get; }
 	}
 
-	public class ChildValidatorAdaptor : NoopPropertyValidator, IChildValidatorAdaptor {
+	public class ChildValidatorAdaptor : NoopPropertyValidator, IChildValidatorAdaptor, IAsyncPropertyValidator {
 		private readonly Func<IValidationContext, IValidator> _validatorProvider;
 		private readonly IValidator _validator;
 
