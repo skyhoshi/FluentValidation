@@ -34,7 +34,7 @@ namespace FluentValidation {
 	/// Base class for object validators.
 	/// </summary>
 	/// <typeparam name="T">The type of the object being validated</typeparam>
-	public abstract class AbstractValidator<T> : IValidator<T>, IEnumerable<IValidationRule> {
+	public abstract class AbstractValidator<T> : IValidator<T>, IAsyncValidator<T>, IEnumerable<IValidationRule> {
 		internal TrackingCollection<IValidationRule> Rules { get; } = new TrackingCollection<IValidationRule>();
 		private Func<CascadeMode> _cascadeMode = () => ValidatorOptions.CascadeMode;
 
@@ -55,7 +55,7 @@ namespace FluentValidation {
 			return Validate((T)instance);
 		}
 		
-		Task<ValidationResult> IValidator.ValidateAsync(object instance, CancellationToken cancellation) {
+		Task<ValidationResult> IAsyncValidator.ValidateAsync(object instance, CancellationToken cancellation) {
 			instance.Guard("Cannot pass null to Validate.", nameof(instance));
 			if (!((IValidator) this).CanValidateInstancesOfType(instance.GetType())) {
 				throw new InvalidOperationException($"Cannot validate instances of type '{instance.GetType().Name}'. This validator can only validate instances of type '{typeof(T).Name}'.");
@@ -69,7 +69,7 @@ namespace FluentValidation {
 			return Validate(context.ToGeneric<T>());
 		}
 		
-		Task<ValidationResult> IValidator.ValidateAsync(ValidationContext context, CancellationToken cancellation) {
+		Task<ValidationResult> IAsyncValidator.ValidateAsync(ValidationContext context, CancellationToken cancellation) {
 			context.Guard("Cannot pass null to Validate", nameof(context));
 			return ValidateAsync(context.ToGeneric<T>(), cancellation);
 		}
@@ -176,6 +176,10 @@ namespace FluentValidation {
 		}
 
 		bool IValidator.CanValidateInstancesOfType(Type type) {
+			return typeof(T).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo());
+		}
+		
+		bool IAsyncValidator.CanValidateInstancesOfType(Type type) {
 			return typeof(T).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo());
 		}
 

@@ -76,8 +76,14 @@ namespace FluentValidation.Validators {
 			}
 
 			var newContext = CreateNewValidationContextForChildValidator(context.PropertyValue, context);
-			var result = await validator.ValidateAsync(newContext, cancellation);
-			return result.Errors;
+			if (validator is IAsyncValidator av) {
+				var result = await av.ValidateAsync(newContext, cancellation);
+				return result.Errors;
+			}
+			else {
+				var result = validator.Validate(newContext);
+				return result.Errors;
+			}
 		}
 
 		public virtual IValidator GetValidator(PropertyValidatorContext context) {

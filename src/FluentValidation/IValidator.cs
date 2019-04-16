@@ -38,14 +38,6 @@ namespace FluentValidation {
 		ValidationResult Validate(T instance);
 
 		/// <summary>
-		/// Validate the specified instance asynchronously
-		/// </summary>
-		/// <param name="instance">The instance to validate</param>
-		/// <param name="cancellation"></param>
-		/// <returns>A ValidationResult object containing any validation failures.</returns>
-		Task<ValidationResult> ValidateAsync(T instance, CancellationToken cancellation = new CancellationToken());
-
-		/// <summary>
 		/// Sets the cascade mode for all rules within this validator.
 		/// </summary>
 		CascadeMode CascadeMode { get; set; }
@@ -63,27 +55,11 @@ namespace FluentValidation {
 		ValidationResult Validate(object instance);
 
 		/// <summary>
-		/// Validates the specified instance asynchronously
-		/// </summary>
-		/// <param name="instance"></param>
-		/// <param name="cancellation">Cancellation token</param>
-		/// <returns>A ValidationResult containing any validation failures</returns>
-		Task<ValidationResult> ValidateAsync(object instance, CancellationToken cancellation = new CancellationToken());
-
-		/// <summary>
 		/// Validates the specified instance.
 		/// </summary>
 		/// <param name="context">A ValidationContext</param>
 		/// <returns>A ValidationResult object contains any validation failures.</returns>
 		ValidationResult Validate(ValidationContext context);
-
-		/// <summary>
-		/// Validates the specified instance asynchronously.
-		/// </summary>
-		/// <param name="context">A ValidationContext</param>
-		/// <param name="cancellation">Cancellation token</param>
-		/// <returns>A ValidationResult object contains any validation failures.</returns>
-		Task<ValidationResult> ValidateAsync(ValidationContext context, CancellationToken cancellation = new CancellationToken());
 
 		/// <summary>
 		/// Creates a hook to access various meta data properties
@@ -95,5 +71,44 @@ namespace FluentValidation {
 		/// Checks to see whether the validator can validate objects of the specified type
 		/// </summary>
 		bool CanValidateInstancesOfType(Type type);
+	}
+
+	public interface IAsyncValidator {
+		/// <summary>
+		/// Validates the specified instance asynchronously.
+		/// </summary>
+		/// <param name="context">A ValidationContext</param>
+		/// <param name="cancellation">Cancellation token</param>
+		/// <returns>A ValidationResult object contains any validation failures.</returns>
+		Task<ValidationResult> ValidateAsync(ValidationContext context, CancellationToken cancellation = new CancellationToken());
+
+		/// <summary>
+		/// Validates the specified instance asynchronously
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <param name="cancellation">Cancellation token</param>
+		/// <returns>A ValidationResult containing any validation failures</returns>
+		Task<ValidationResult> ValidateAsync(object instance, CancellationToken cancellation = new CancellationToken());
+		
+		/// <summary>
+		/// Checks to see whether the validator can validate objects of the specified type
+		/// </summary>
+		bool CanValidateInstancesOfType(Type type);
+		
+		/// <summary>
+		/// Creates a hook to access various meta data properties
+		/// </summary>
+		/// <returns>A IValidatorDescriptor object which contains methods to access metadata</returns>
+		IValidatorDescriptor CreateDescriptor();
+	}
+
+	public interface IAsyncValidator<in T> : IAsyncValidator {
+		/// <summary>
+		/// Validate the specified instance asynchronously
+		/// </summary>
+		/// <param name="instance">The instance to validate</param>
+		/// <param name="cancellation"></param>
+		/// <returns>A ValidationResult object containing any validation failures.</returns>
+		Task<ValidationResult> ValidateAsync(T instance, CancellationToken cancellation = new CancellationToken());
 	}
 }
