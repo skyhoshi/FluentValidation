@@ -27,7 +27,7 @@ namespace FluentValidation.Internal {
 	using Resources;
 	using Results;
 	using Validators;
-
+	
 	/// <summary>
 	/// Defines a rule associated with a property.
 	/// </summary>
@@ -86,7 +86,7 @@ namespace FluentValidation.Internal {
 		/// <summary>
 		/// The current validator being configured by this rule.
 		/// </summary>
-		public IPropertyValidator CurrentValidator { get; private set; }
+		public IPropertyValidatorOptions CurrentValidator { get; protected internal set; }
 
 		/// <summary>
 		/// Type of the property being validated
@@ -146,7 +146,7 @@ namespace FluentValidation.Internal {
 		/// <summary>
 		/// Adds a validator to the rule.
 		/// </summary>
-		public void AddValidator(IPropertyValidator validator) {
+		public virtual void AddValidator(IPropertyValidator validator) {
 			CurrentValidator = validator;
 			_validators.Add(validator);
 		}
@@ -512,7 +512,27 @@ namespace FluentValidation.Internal {
 				var original = _asyncCondition;
 				_asyncCondition = async (ctx, ct) => await condition(ctx, ct) && await original(ctx, ct);
 			}
-			
+		}
+	}
+
+	public class AsyncPropertyRule : PropertyRule {
+		readonly List<IAsyncPropertyValidator> _asyncValidators = new List<IAsyncPropertyValidator>();
+
+		public AsyncPropertyRule(MemberInfo member, Func<object, object> propertyFunc, LambdaExpression expression, Func<CascadeMode> cascadeModeThunk, Type typeToValidate, Type containerType) 
+			: base(member, propertyFunc, expression, cascadeModeThunk, typeToValidate, containerType) {
+		}
+
+		/// <summary>
+		/// The current validator being configured by this rule.
+		/// </summary>
+		public IAsyncPropertyValidator CurrentAsyncValidator { get; private set; }
+		
+		/// <summary>
+		/// Adds a validator to the rule.
+		/// </summary>
+		public void AddAsyncValidator(IAsyncPropertyValidator validator) {
+			CurrentValidator = validator;
+			_asyncValidators.Add(validator);
 		}
 	}
 }

@@ -24,26 +24,28 @@ namespace FluentValidation.Validators {
 	using Resources;
 	using Results;
 
+	public interface IPropertyValidatorOptions {
+		/// <summary>
+		/// Additional options for configuring the property validator.
+		/// </summary>
+		PropertyValidatorOptions Options { get; }
+	}
+	
 	/// <summary>
 	/// A custom property validator.
 	/// This interface should not be implemented directly in your code as it is subject to change.
 	/// Please inherit from <see cref="PropertyValidator">PropertyValidator</see> instead.
 	/// </summary>
-	public interface IPropertyValidator {
+	public interface IPropertyValidator : IPropertyValidatorOptions {
 		/// <summary>
 		/// Performs validation
 		/// </summary>
 		/// <param name="context"></param>
 		/// <returns></returns>
 		IEnumerable<ValidationFailure> Validate(PropertyValidatorContext context);
-		
-		/// <summary>
-		/// Additional options for configuring the property validator.
-		/// </summary>
-		PropertyValidatorOptions Options { get; }
 	}
 
-	public interface IAsyncPropertyValidator {
+	public interface IAsyncPropertyValidator : IPropertyValidatorOptions {
 		/// <summary>
 		/// Performs validation asynchronously.
 		/// </summary>
@@ -58,10 +60,5 @@ namespace FluentValidation.Validators {
 		/// <param name="context"></param>
 		/// <returns></returns>
 		bool ShouldValidateAsync(ValidationContext context);
-		
-		/// <summary>
-		/// Additional options for configuring the property validator.
-		/// </summary>
-		PropertyValidatorOptions Options { get; }
 	}
 }
