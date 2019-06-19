@@ -1,42 +1,47 @@
-﻿#region License
-// Copyright (c) Jeremy Skinner (http://www.jeremyskinner.co.uk)
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// The latest version of this file can be found at https://github.com/JeremySkinner/FluentValidation
-#endregion
 namespace FluentValidation.Resources {
 	using System;
 	using System.Collections.Concurrent;
 	using System.Collections.Generic;
 	using System.Globalization;
-	using Validators;
+	using Microsoft.Extensions.Localization;
 
 	/// <summary>
-	/// Allows the default error message translations to be managed.
+	/// Class for managing translations of FluentValidation error messages.
 	/// </summary>
-	public class LanguageManager : ILanguageManager {
+	public class LanguageManager : IStringLocalizer<LanguageManager> {
+		private readonly CultureInfo _cultureOverride;
 		private readonly ConcurrentDictionary<string, Language> _languages;
-		private readonly Language _fallback = new EnglishLanguage();
+		private readonly Language _fallback;
 
 		/// <summary>
-		/// Creates a new instance of the LanguageManager class.
+		/// The culture to use.
+		/// </summary>
+		protected CultureInfo GetCulture() => _cultureOverride ?? CultureInfo.CurrentUICulture;
+
+		/// <summary>
+		/// Creates an instance of the LanguageManager. The current culture will be used to translate error messages.
 		/// </summary>
 		public LanguageManager() {
+			_fallback = new EnglishLanguage();
 			// Initialize with English as the default. Others will be lazily loaded as needed.
 			_languages = new ConcurrentDictionary<string, Language>(new[] {
 				new KeyValuePair<string, Language>(EnglishLanguage.Culture, _fallback),
 			});
+		}
+
+		/// <summary>
+		/// Creates a new instance of the language manager.
+		/// The specified culture will always be used to translate error messages, regardless of the current culture.
+		/// </summary>
+		/// <param name="culture">The culture to use for error message translations.</param>
+		public LanguageManager(CultureInfo culture) : this() {
+			_cultureOverride = culture;
+		}
+
+		internal LanguageManager(CultureInfo culture, ConcurrentDictionary<string, Language> languages, Language fallback) {
+			_languages = languages;
+			_cultureOverride = culture;
+			_fallback = fallback;
 		}
 
 		/// <summary>
@@ -78,19 +83,9 @@ namespace FluentValidation.Resources {
 				SwedishLanguage.Culture => new SwedishLanguage(),
 				TurkishLanguage.Culture => new TurkishLanguage(),
 				UkrainianLanguage.Culture => new UkrainianLanguage(),
-				_=> (Language)null,
-			};
+				_=> (Language) null,
+				};
 		}
-
-		/// <summary>
-		/// Whether localization is enabled.
-		/// </summary>
-		public bool Enabled { get; set; } = true;
-
-		/// <summary>
-		/// Default culture to use for all requests to the LanguageManager. If not specified, uses the current UI culture.
-		/// </summary>
-		public CultureInfo Culture { get; set; }
 
 		/// <summary>
 		/// Removes all languages except the default.
@@ -99,35 +94,73 @@ namespace FluentValidation.Resources {
 			_languages.Clear();
 		}
 
-		/// <summary>
-		/// Gets a translated string based on its key. If the culture is specific and it isn't registered, we try the neutral culture instead.
-		/// If no matching culture is found  to be registered we use English.
-		/// </summary>
-		/// <param name="key">The key</param>
-		/// <param name="culture">The culture to translate into</param>
-		/// <returns></returns>
-		public virtual string GetString(string key, CultureInfo culture=null) {
-			string value;
+		/// <inheritdoc />
+		public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) {
+			var culture = GetCulture();
 
-			if (Enabled) {
-				culture = culture ?? Culture ?? CultureInfo.CurrentUICulture;
-				var languageToUse = GetCachedLanguage(culture) ?? _fallback;
-				value = languageToUse.GetTranslation(key);
+			var resourceNames = includeParentCultures
+				? GetResourceNamesFromCultureHierarchy(culture)
+				: GetLanguage(culture)?.GetSupportedKeys();
 
-				// Selected language is missing a translation for this key - fall back to English translation
-				// if we're not using english already.
-				if (string.IsNullOrEmpty(value) && languageToUse != _fallback) {
-					value = _fallback.GetTranslation(key);
+			if (resourceNames != null) {
+				foreach (var name in resourceNames) {
+					yield return new LocalizedString(name, GetString(name, culture));
 				}
 			}
-			else {
-				value = _fallback.GetTranslation(key);
+		}
+
+		/// <summary>
+		/// Adds additional translations.
+		/// </summary>
+		/// <param name="language">The culture for which the translation should be added.</param>
+		/// <param name="key">The error code/validator name that should be translated</param>
+		/// <param name="message">The translated error message</param>
+		/// <exception cref="ArgumentNullException"></exception>
+		public void AddTranslation(string language, string key, string message) {
+			if (string.IsNullOrEmpty(language)) throw new ArgumentNullException(nameof(language));
+			if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
+			if (string.IsNullOrEmpty(message)) throw new ArgumentNullException(nameof(message));
+
+			if (!_languages.ContainsKey(language)) {
+				_languages[language] = new GenericLanguage(language);
+			}
+
+			_languages[language].Translate(key, message);
+		}
+
+		/// <inheritdoc />
+		[Obsolete("Set CultureInfo.CurrentUICulture instead.")]
+		public IStringLocalizer WithCulture(CultureInfo culture) {
+			return new LanguageManager(culture, _languages, _fallback);
+		}
+
+		/// <inheritdoc />
+		public LocalizedString this[string name] => new LocalizedString(name, GetString(name, GetCulture()));
+
+		/// <inheritdoc />
+		public LocalizedString this[string name, params object[] arguments]
+			=> new LocalizedString(name, string.Format(GetString(name, GetCulture()), arguments));
+
+		/// <summary>
+		/// Gets a string from the specified culture.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="culture"></param>
+		/// <returns></returns>
+		protected virtual string GetString(string name, CultureInfo culture) {
+			var languageToUse = GetLanguage(culture) ?? _fallback;
+			string value = languageToUse.GetTranslation(name);
+
+			// Selected language is missing a translation for this key - fall back to English translation
+			// if we're not using english already.
+			if (string.IsNullOrEmpty(value) && languageToUse != _fallback) {
+				value = _fallback.GetTranslation(name);
 			}
 
 			return value ?? string.Empty;
 		}
 
-		private Language GetCachedLanguage(CultureInfo culture) {
+		private Language GetLanguage(CultureInfo culture) {
 			// Find matching translations.
 			var languageToUse = _languages.GetOrAdd(culture.Name, CreateLanguage);
 
@@ -140,13 +173,28 @@ namespace FluentValidation.Resources {
 			return languageToUse;
 		}
 
-		public void AddTranslation(string language, string key, string message) {
-			if (string.IsNullOrEmpty(language)) throw new ArgumentNullException(nameof(language));
-			if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
-			if (string.IsNullOrEmpty(message)) throw new ArgumentNullException(nameof(message));
+		// This method is from ASP.NET Core's ResourceManagerStringLocalizer.
+		private IEnumerable<string> GetResourceNamesFromCultureHierarchy(CultureInfo startingCulture) {
+			var currentCulture = startingCulture;
+			var resourceNames = new HashSet<string>();
 
-			var languageInstance = _languages.GetOrAdd(language, c => CreateLanguage(c) ?? new GenericLanguage(c));
-			languageInstance.Translate(key, message);
+			while (true) {
+				var cultureResourceNames = GetLanguage(currentCulture)?.GetSupportedKeys();
+
+				if (cultureResourceNames != null) {
+					foreach (var resourceName in cultureResourceNames) {
+						resourceNames.Add(resourceName);
+					}
+				}
+
+				if (currentCulture == currentCulture.Parent) {
+					break;
+				}
+
+				currentCulture = currentCulture.Parent;
+			}
+
+			return resourceNames;
 		}
 	}
 }

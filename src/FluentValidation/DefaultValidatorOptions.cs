@@ -24,6 +24,7 @@ namespace FluentValidation {
 	using System.Threading;
 	using System.Threading.Tasks;
 	using Internal;
+	using Microsoft.Extensions.Localization;
 	using Resources;
 	using Results;
 	using Validators;
@@ -473,8 +474,8 @@ namespace FluentValidation {
 		/// </summary>
 		/// <typeparam name="T">The validator type</typeparam>
 		/// <returns>The translated string</returns>
-		public static string GetStringForValidator<T>(this ILanguageManager languageManager) {
-			return languageManager.GetString(typeof(T).Name);
+		public static string GetStringForValidator<T>(this IStringLocalizer languageManager) {
+			return languageManager[typeof(T).Name];
 		}
 	}
 }

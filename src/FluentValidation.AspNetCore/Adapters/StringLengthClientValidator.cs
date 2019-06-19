@@ -52,10 +52,10 @@ namespace FluentValidation.AspNetCore {
 			}
 			catch (FluentValidationMessageFormatException) {
 				if (lengthVal is ExactLengthValidator) {
-					message = cfg.LanguageManager.GetString("ExactLength_Simple");
+					message = cfg.LanguageManager["ExactLength_Simple"];
 				}
 				else {
-					message = cfg.LanguageManager.GetString("Length_Simple");
+					message = cfg.LanguageManager["Length_Simple"];
 				}
 
 				needsSimplifiedMessage = false;
@@ -63,10 +63,10 @@ namespace FluentValidation.AspNetCore {
 
 			if (needsSimplifiedMessage && message.Contains("{TotalLength}")) {
 				if (lengthVal is ExactLengthValidator) {
-					message = cfg.LanguageManager.GetString("ExactLength_Simple");
+					message = cfg.LanguageManager["ExactLength_Simple"];
 				}
 				else {
-					message = cfg.LanguageManager.GetString("Length_Simple");
+					message = cfg.LanguageManager["Length_Simple"];
 				}
 			}
 

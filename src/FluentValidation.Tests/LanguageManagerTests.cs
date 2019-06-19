@@ -9,7 +9,7 @@
 	using Xunit;
 
 	public class LanguageManagerTests {
-		private ILanguageManager _languages;
+		private LanguageManager _languages;
 
 		public LanguageManagerTests() {
 			_languages = new LanguageManager();
@@ -70,28 +70,20 @@
 
 		[Fact]
 		public void Always_use_specific_language() {
-			_languages.Culture = new CultureInfo("fr-FR");
-			var msg = _languages.GetStringForValidator<NotNullValidator>();
+			var l = new LanguageManager(new CultureInfo("fr-FR"));
+			var msg = l.GetStringForValidator<NotNullValidator>();
 			msg.ShouldEqual("'{PropertyName}' ne doit pas avoir la valeur null.");
 		}
 
 		[Fact]
 		public void Always_use_specific_language_with_string_source() {
-			ValidatorOptions.LanguageManager.Culture = new CultureInfo("fr-FR");
+			var original = ValidatorOptions.Global.LanguageManager;
+			ValidatorOptions.Global.LanguageManager = new LanguageManager(new CultureInfo("fr-FR"));
 			var stringSource = new LanguageStringSource(nameof(NotNullValidator));
 			var msg = stringSource.GetString(null);
-			ValidatorOptions.LanguageManager.Culture = null;
+			ValidatorOptions.Global.LanguageManager = original;
 
 			msg.ShouldEqual("'{PropertyName}' ne doit pas avoir la valeur null.");
-		}
-
-		[Fact]
-		public void Disables_localization() {
-			using (new CultureScope("fr")) {
-				_languages.Enabled = false;
-				var msg = _languages.GetStringForValidator<NotNullValidator>();
-				msg.ShouldEqual("'{PropertyName}' must not be empty.");
-			}
 		}
 
 		[Fact]
@@ -149,7 +141,7 @@
 				.Where(t => typeof(Language).IsAssignableFrom(t) && !t.IsAbstract && t.Name != "GenericLanguage")
 				.Select(t => (Language) Activator.CreateInstance(t));
 
-			string englishMessage = _languages.GetString(nameof(NotNullValidator), new CultureInfo("en"));
+			string englishMessage = _languages.WithCulture(new CultureInfo("en"))[nameof(NotNullValidator)];
 
 			foreach (var language in languages) {
 				// Skip english as we know it's always loaded and will match.
@@ -159,7 +151,7 @@
 
 				// Get the message from the language manager from the culture. If it's in English, then it's hit the
 				// fallback and means the culture hasn't been loaded.
-				string message = _languages.GetString(nameof(NotNullValidator), new CultureInfo(language.Name));
+				string message = _languages.WithCulture(new CultureInfo(language.Name))[nameof(NotNullValidator)];
 				(message != englishMessage).ShouldBeTrue($"Language '{language.Name}' ({language.GetType().Name}) is not loaded in the LanguageManager");
 			}
 		}
@@ -193,8 +185,8 @@
 		}
 
 		void CheckParametersMatch(string languageCode, string translationKey) {
-			var referenceMessage = _languages.GetString(translationKey);
-			var translatedMessage = _languages.GetString(translationKey, new CultureInfo(languageCode));
+			var referenceMessage = _languages[translationKey];
+			var translatedMessage = _languages.WithCulture(new CultureInfo(languageCode))[translationKey];
 			if (referenceMessage == translatedMessage) return;
 			var referenceParameters = ExtractTemplateParameters(referenceMessage);
 			var translatedParameters = ExtractTemplateParameters(translatedMessage);

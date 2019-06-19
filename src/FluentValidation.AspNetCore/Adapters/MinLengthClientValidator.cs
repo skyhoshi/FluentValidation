@@ -45,12 +45,12 @@ namespace FluentValidation.AspNetCore {
 		    try {
 			    message = lengthVal.Options.ErrorMessageSource.GetString(null);
 		    } catch (FluentValidationMessageFormatException) {
-				message = cfg.LanguageManager.GetString("MinimumLength_Simple");
+				message = cfg.LanguageManager["MinimumLength_Simple"];
 			    needsSimifiedMessage = false;
 		    }
 
 		    if (needsSimifiedMessage && message.Contains("{TotalLength}")) {
-			    message = cfg.LanguageManager.GetString("MinimumLength_Simple");
+			    message = cfg.LanguageManager["MinimumLength_Simple"];
 		    }
 
 		    message = formatter.BuildMessage(message);

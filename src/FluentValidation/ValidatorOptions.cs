@@ -21,6 +21,7 @@ namespace FluentValidation {
 	using System.Linq.Expressions;
 	using System.Reflection;
 	using Internal;
+	using Microsoft.Extensions.Localization;
 	using Resources;
 	using Validators;
 
@@ -32,7 +33,7 @@ namespace FluentValidation {
 		private Func<Type, MemberInfo, LambdaExpression, string> _displayNameResolver = DefaultDisplayNameResolver;
 		private Func<MessageFormatter> _messageFormatterFactory = () => new MessageFormatter();
 		private Func<PropertyValidator, string> _errorCodeResolver = DefaultErrorCodeResolver;
-		private ILanguageManager _languageManager = new LanguageManager();
+		private IStringLocalizer _languageManager = new LanguageManager();
 
 		/// <summary>
 		/// Default cascade mode
@@ -47,7 +48,7 @@ namespace FluentValidation {
 		/// <summary>
 		/// Default language manager
 		/// </summary>
-		public ILanguageManager LanguageManager {
+		public IStringLocalizer LanguageManager {
 			get => _languageManager;
 			set => _languageManager = value ?? throw new ArgumentNullException(nameof(value));
 		}
@@ -142,7 +143,7 @@ namespace FluentValidation {
 		/// Default language manager
 		/// </summary>
 		[Obsolete("This property will be removed in FluentValidation 10. Use ValidatorOptions.Global.LanguageManager instead.")]
-		public static ILanguageManager LanguageManager {
+		public static IStringLocalizer LanguageManager {
 			get => Global.LanguageManager;
 			set => Global.LanguageManager = value;
 		}

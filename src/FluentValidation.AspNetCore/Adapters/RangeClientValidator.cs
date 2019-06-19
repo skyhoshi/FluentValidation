@@ -56,12 +56,12 @@ namespace FluentValidation.AspNetCore {
 				message = RangeValidator.Options.ErrorMessageSource.GetString(null);
 			}
 			catch (FluentValidationMessageFormatException) {
-				message = cfg.LanguageManager.GetString("InclusiveBetween_Simple");
+				message = cfg.LanguageManager["InclusiveBetween_Simple"];
 				needsSimplifiedMessage = false;
 			}
 
 			if (needsSimplifiedMessage && message.Contains("{Value}")) {
-				message = cfg.LanguageManager.GetString("InclusiveBetween_Simple");
+				message = cfg.LanguageManager["InclusiveBetween_Simple"];
 			}
 			message = formatter.BuildMessage(message);
 
