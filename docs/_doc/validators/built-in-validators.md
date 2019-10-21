@@ -300,11 +300,13 @@ String format args:
 * {PropertyName} = The name of the property being validated
 * {PropertyValue} = The current value of the property
 
-Internally, the email address validator uses the same regular expression as used by the .NET Framework's `EmailAddressAttribute`. Note that this regex is not 100% comprehensive, but this should not be considered a problem. A fully comprehensive regex would be extremely complicated, is not performant and is impossible to debug. When validating email addresses, it is better to not try and be too strict. See the following pages for information on this:
+The email address validator can work in 2 modes. The default mode just performs a simple check that the string contains an "@" sign which is not at the beginning or the end of the string. This is an intentionally naive check to match the behaviour of ASP.NET Core's `EmailAddressAttribute`, which performs the same check. For the reasoning behind this, see [this post](https://github.com/dotnet/corefx/issues/32740): 
 
-- [The 100% Correct way to validate email addresses](https://hackernoon.com/the-100-correct-way-to-validate-email-addresses-7c4818f24643)
-- [Stop validating email addresses with Regex](https://davidcel.is/posts/stop-validating-email-addresses-with-regex/)
-- [How to validate an email address using a regular expression?](https://stackoverflow.com/a/201378)
+From the comments:
+
+> "This is not something we plan to implement. The check is intentionally naive because doing something infallible is very hard. The email really should be validated in some other way, such as through an email confirmation flow where an email is actually sent. The validation attribute is designed only to catch egregiously wrong values such as for a U.I."
+
+Alternatively, you can use the old email validation behaviour that uses a regular expression consistent with the .NET 4.x version of the ASP.NET `EmailAddressAttribute`. You can use this behaviour in FluentValidation by calling `RuleFor(x => x.Email).EmailAddress(EmailValidationMode.Net4xRegex)`. Note that this approach is deprecated and will generate a warning as regex-based email validation is not recommended. 
 
 #### Credit Card Validator
 Checks whether a string property could be a valid credit card number. 
