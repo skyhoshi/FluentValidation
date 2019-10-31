@@ -7,7 +7,7 @@ sections:
   - Contributing Languages
   - Disabling Localization
 ---
-Out of the box, FluentValidation provides translations for the default validation messages in several languages. By default, the language specified in the .NET's framework's Current UI Culture will be used (`CultureInfo.CurrentUICulture`) when translating messages. 
+Out of the box, FluentValidation provides translations for the default validation messages in several languages. By default, the language specified in the .NET's framework's Current UI Culture will be used (`CultureInfo.CurrentUICulture`) when translating messages.
 
 You can also use the `WithMessage` and `WithLocalizedMessage` methods to specify a localized error message for a single validation rule.
 
@@ -17,7 +17,7 @@ If you are using Visual Studio's built in support for resx files and their stron
 ```
 RuleFor(x => x.Surname).NotNull().WithMessage(x => MyLocalizedMessages.SurnameRequired);
 ```
-You could also use the same approach if you need to obtain the localized message from another source (such as a database) by obtaining the string from within the lambda. 
+You could also use the same approach if you need to obtain the localized message from another source (such as a database) by obtaining the string from within the lambda.
 
 ### WithLocalizedMessage
 
@@ -27,22 +27,24 @@ As an alternative to the above, you can localize an error message for by calling
 RuleFor(x => x.Surname).NotNull().WithLocalizedMessage(typeof(MyLocalizedMessages), "SurnameRequired");
 ```
 
+*Note* this method is deprecated in FluentValidation 8.x, and has been removed from FluentValidation 9.
+
 ### IStringLocalizer
 
-The above 2 examples assume you're using a strongly-typed wrapper around a resource file, where each static property on the class corresponds to a key within the resourece file. This is the "old" way of working with resources prior to ASP.NET Core, but is not relevant if you're using ASP.NET Core's `IStringLocalizer`. 
+The above 2 examples assume you're using a strongly-typed wrapper around a resource file, where each static property on the class corresponds to a key within the resourece file. This is the "old" way of working with resources prior to ASP.NET Core, but is not relevant if you're using ASP.NET Core's `IStringLocalizer`.
 
 If you are using `IStringLocalizer` to handle localization then all you need to do is inject your localizer into your validator, and use it within a `WithMessage` callback, for example:
 
 ```csharp
 public class PersonValidator : AbstractValidator<Person> {
   public PersonValidator(IStringLocalizer<Person> localizer) {
-    RuleFoR(x => x.Surname).NotNull().WithMessage(x => localizer["Surname is required"]);
+    RuleFor(x => x.Surname).NotNull().WithMessage(x => localizer["Surname is required"]);
   }
 }
 ```
 
-### Default Messages 
-If you want to replace all (or some) of FluentValidation's default messages then you can do this by implementing a custom version of the `ILanguageManager` interface. 
+### Default Messages
+If you want to replace all (or some) of FluentValidation's default messages then you can do this by implementing a custom version of the `ILanguageManager` interface.
 
 For example, the default message for the `NotNull` validator is `'{PropertyName}' must not be empty.`. If you wanted to replace this message for all uses of the NotNull validator in your application, you could write a custom Language Manager:
 
@@ -62,12 +64,12 @@ Once this is done, we can replace the default LanguageManager by setting the Lan
 ValidatorOptions.LanguageManager = new CustomLanguageManager();
 ```
 
-This is a simple example that only replaces one validator's message in English only, but could be extended to replace the messages for all languages. Instead of inheriting from the default LanguageManager, you could also implement the `ILanguageManager` interface directly if you want to load the messages from a completely different location other than the FluentValidation default (for example, if you wanted to store FluentValidation's default messages in a database).  
+This is a simple example that only replaces one validator's message in English only, but could be extended to replace the messages for all languages. Instead of inheriting from the default LanguageManager, you could also implement the `ILanguageManager` interface directly if you want to load the messages from a completely different location other than the FluentValidation default (for example, if you wanted to store FluentValidation's default messages in a database).
 
 Of course, if all you want to do is replace this message for a single use of a validator, then you could just use `WithMessage("'{PropertyName}' is required");`
 
 ### Contributing Languages
-If you'd like to contribute a translation of FluentValidation's default messages, then I'd be very grateful! Please open a pull request that adds a language file to the project and I'll happily merge it in. The current language files are [located in the GitHub repository](https://github.com/JeremySkinner/FluentValidation/tree/master/src/FluentValidation/Resources/Languages). 
+If you'd like to contribute a translation of FluentValidation's default messages, then I'd be very grateful! Please open a pull request that adds a language file to the project and I'll happily merge it in. The current language files are [located in the GitHub repository](https://github.com/JeremySkinner/FluentValidation/tree/master/src/FluentValidation/Resources/Languages).
 
 [The default English messages are stored here](https://github.com/JeremySkinner/FluentValidation/blob/master/src/FluentValidation/Resources/Languages/EnglishLanguage.cs)
 
@@ -75,8 +77,8 @@ If you'd like to contribute a translation of FluentValidation's default messages
 You can completely disable FluentValidation's support for localization, which will force the default English messages to be used, regardless of the thread's CurrentUICulture. This can be done in your application's startup routine by calling into the static `ValidatorOptions` class:
 
 ```csharp
-ValidatorOptions.LanguageManager.Enabled = false; 
-``` 
+ValidatorOptions.LanguageManager.Enabled = false;
+```
 You can could also force the default messages to always be displayed in a specific language:
 
 ```csharp
