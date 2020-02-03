@@ -19,16 +19,6 @@ RuleFor(x => x.Surname).NotNull().WithMessage(x => MyLocalizedMessages.SurnameRe
 ```
 You could also use the same approach if you need to obtain the localized message from another source (such as a database) by obtaining the string from within the lambda.
 
-### WithLocalizedMessage
-
-As an alternative to the above, you can localize an error message for by calling `WithLocalizedMessage` passing in the resource type and resource name:
-
-```
-RuleFor(x => x.Surname).NotNull().WithLocalizedMessage(typeof(MyLocalizedMessages), "SurnameRequired");
-```
-
-*Note* this method is deprecated in FluentValidation 8.x, and has been removed from FluentValidation 9.
-
 ### IStringLocalizer
 
 The above 2 examples assume you're using a strongly-typed wrapper around a resource file, where each static property on the class corresponds to a key within the resourece file. This is the "old" way of working with resources prior to ASP.NET Core, but is not relevant if you're using ASP.NET Core's `IStringLocalizer`.

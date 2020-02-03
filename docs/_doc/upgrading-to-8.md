@@ -2,6 +2,12 @@
 title: Upgrading to FluentValidation 8
 ---
 
+### Upgrade Guides
+- [Upgrading from 8.x to 9.0](/upgrading-to-9.html)
+- [Upgrading from 7.x to 8.0](/upgrading-to-8.html)
+
+### Intro
+
 FluentValidation 8.0 is a major release that included several breaking changes. Please review this document before upgrading from FluentValidation 7.x to 8.
 
 ### Asynchronous Validation updates
