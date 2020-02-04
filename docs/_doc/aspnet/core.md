@@ -252,7 +252,7 @@ public ActionResult Save([CustomizeValidator(Interceptor=typeof(MyCustomerInterc
 }
 ```
 
-In this case, the interceptor has to be a class that implements IValidatorInterceptor and has a public, parameterless constructor. 
+In this case, the interceptor has to be a class that implements IValidatorInterceptor and has a public, parameterless constructor.
 
 Alternatively, you can register a default `IValidatorInterceptor` with the ASP.NET Service Provider. If you do this, then the interceptor will be used for all validators:
 
@@ -262,7 +262,7 @@ public void ConfigureServices(IServiceCollection services) {
       .AddMvc()
       .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<PersonValidator>());
 
-    // Register a default interceptor, where MyDefaultInterceptor is a class that 
+    // Register a default interceptor, where MyDefaultInterceptor is a class that
     // implements IValidatorInterceptor.
     services.AddTransient<IValidatorInterceptor, MyDefaultInterceptor>();
 }
@@ -321,6 +321,8 @@ public class PersonValidator : AbstractValidator<Person> {
   }
 }
 ```
+
+Please be aware that `InjectValidator` can *only* be used when using automatic validation. It can't be used if you directly invoke the `Validate` method.
 
 ### Use with Page Models
 
