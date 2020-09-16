@@ -124,7 +124,7 @@ namespace FluentValidation.Internal {
 
 		public IRuleBuilderInitial<T, TNew> Transform<TNew>(Func<TProperty, TNew> transformationFunc) {
 			if (transformationFunc == null) throw new ArgumentNullException(nameof(transformationFunc));
-			Rule.Transformer = transformationFunc.CoerceToNonGeneric();
+			Rule.SetTransformer(transformationFunc.CoerceToNonGeneric());
 			return new RuleBuilder<T, TNew>(Rule, ParentValidator);
 		}
 	}

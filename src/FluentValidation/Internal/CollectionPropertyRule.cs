@@ -123,9 +123,11 @@ namespace FluentValidation.Internal {
 
 					object valueToValidate = element;
 
+#pragma warning disable 618
 					if (Transformer != null) {
 						valueToValidate = Transformer(element);
 					}
+#pragma warning restore 618
 
 					var newPropertyContext = new PropertyValidatorContext(newContext, this, newContext.PropertyChain.ToString(), valueToValidate);
 					newPropertyContext.MessageFormatter.AppendArgument("CollectionIndex", index);
@@ -216,9 +218,11 @@ namespace FluentValidation.Internal {
 
 					object valueToValidate = element;
 
+#pragma warning disable 618
 					if (Transformer != null) {
 						valueToValidate = Transformer(element);
 					}
+#pragma warning restore 618
 
 					var newPropertyContext = new PropertyValidatorContext(newContext, this, newContext.PropertyChain.ToString(), valueToValidate);
 					newPropertyContext.MessageFormatter.AppendArgument("CollectionIndex", index);

@@ -241,6 +241,7 @@ namespace FluentValidation.Internal {
 		/// </summary>
 		public List<IValidationRule> DependentRules { get; }
 
+		[Obsolete("The Transformer property is deprecated and will be removed in FluentValidation 10. Please call SetTransformer instead.")]
 		public Func<object, object> Transformer { get; set; }
 
 		/// <summary>
@@ -499,7 +500,9 @@ namespace FluentValidation.Internal {
 		/// <returns>The value to be validated</returns>
 		internal virtual object GetPropertyValue(object instanceToValidate) {
 			var value = PropertyFunc(instanceToValidate);
+#pragma warning disable 618
 			if (Transformer != null) value = Transformer(value);
+#pragma warning restore 618
 			return value;
 		}
 
@@ -563,7 +566,12 @@ namespace FluentValidation.Internal {
 				var original = _asyncCondition;
 				_asyncCondition = async (ctx, ct) => await condition(ctx, ct) && await original(ctx, ct);
 			}
-
 		}
+
+#pragma warning disable 618
+		//TODO: For FV10, this shouldn't just set the property but should instead swap out the execution logic
+		// if we're moving to generics for rule instances.
+		public void SetTransformer(Func<object, object> transformer) => Transformer = transformer;
+#pragma warning restore 618
 	}
 }
